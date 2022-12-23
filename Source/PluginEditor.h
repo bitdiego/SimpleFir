@@ -31,5 +31,7 @@ private:
     SimpleFirAudioProcessor& audioProcessor;
     juce::Slider gain_slider;
     juce::Slider delay_slider;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>
+        sliderAttachment;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleFirAudioProcessorEditor)
 };

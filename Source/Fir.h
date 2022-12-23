@@ -17,26 +17,8 @@
 template<class T>
 class Fir {
 public:
-
-    //    DP: is it ok?
-    /*Fir(std::shared_ptr<DelayLineExt<T>> delay_line) : m_delay_line(delay_line) {
-
-    }
-
-    Fir(std::shared_ptr<DelayLineExt<T>> delay_line, double gain) : m_delay_line(delay_line), m_gain(gain) {
-
-    }
-
-    ~Fir()
-    {
-
-    }
-    */
-    Fir(DelayLine<T>* delay_line) : m_delay_line(delay_line) {
-
-    }
-    Fir(DelayLine<T>* delay_line, T gain) : m_delay_line(delay_line), m_gain(gain) {
-
+ explicit Fir(std::shared_ptr<DelayLine<T>> delay_line, T gain = 0)
+     : m_delay_line(std::move(delay_line)), m_gain(gain) {
     }
 
     void set_gain(T gain) {
@@ -54,8 +36,5 @@ public:
 
 private:
     T m_gain{ 0.0 };
-    DelayLine<T>* m_delay_line;
-
-    //DP: is it ok?
-    //std::shared_ptr<DelayLineExt<T>> m_delay_line;
+    std::shared_ptr<DelayLine<T>> m_delay_line;
 };

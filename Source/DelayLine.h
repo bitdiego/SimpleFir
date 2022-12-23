@@ -43,11 +43,11 @@ public:
     T compute_sample(const T& input) {
         m_buffer[m_write_index++] = input;
         T output = m_buffer[m_read_index++];
-        if (m_read_index >= m_buffer.size()) {
-            m_read_index -= static_cast<int> (m_buffer.size());
+        if (m_read_index >= std::ssize(m_buffer)) {
+          m_read_index -= std::ssize(m_buffer);
         }
-        if (m_write_index >= m_buffer.size()) {
-            m_write_index -= static_cast<int> (m_buffer.size());
+        if (m_write_index >= std::ssize(m_buffer)) {
+          m_write_index -= std::ssize(m_buffer);
         }
 
         return output;
