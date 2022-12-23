@@ -60,11 +60,10 @@ public:
     //Fir section
     std::atomic<float> fir_gain;
     std::atomic<int> delay;
-    DelayLine<float>* delay_line;
-    Fir<float>* fir;
+    std::shared_ptr<DelayLine<float>> delay_line;
+    std::unique_ptr<Fir<float>> fir;
+    juce::AudioProcessorValueTreeState parameters;
 private:
-    juce::AudioParameterFloat* filter_gain;
-    juce::AudioParameterInt* filter_delay;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleFirAudioProcessor)
 };

@@ -21,6 +21,7 @@ SimpleFirAudioProcessorEditor::SimpleFirAudioProcessorEditor (SimpleFirAudioProc
     gain_slider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 25);
     gain_slider.setTopLeftPosition(-100, 0);
     gain_slider.setRange(min_fir_gain, max_fir_gain, 0.05);
+    gain_slider.setValue(audioProcessor.fir_gain);
     gain_slider.addListener(this);
     addAndMakeVisible(gain_slider);
     /*Delay slider section*/
@@ -28,8 +29,14 @@ SimpleFirAudioProcessorEditor::SimpleFirAudioProcessorEditor (SimpleFirAudioProc
     delay_slider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 25);
     delay_slider.setTopLeftPosition(100, 0);
     delay_slider.setRange(1, max_delay_in_samples, 1);
-    delay_slider.addListener(this);
+    //delay_slider.setValue(audioProcessor.delay);
+    //delay_slider.addListener(this);
     addAndMakeVisible(delay_slider);
+
+    sliderAttachment = std::make_unique<
+        juce::AudioProcessorValueTreeState::SliderAttachment>(
+            audioProcessor.parameters, "filter_delay", delay_slider);
+
 }
 
 SimpleFirAudioProcessorEditor::~SimpleFirAudioProcessorEditor()
@@ -58,8 +65,9 @@ void SimpleFirAudioProcessorEditor::sliderValueChanged(juce::Slider* slider)
     {
         audioProcessor.fir_gain = gain_slider.getValue();
     }
-    else if (slider == &delay_slider)
-    {
-        audioProcessor.delay = delay_slider.getValue();
-    }
+    //else
+        //if (slider == &delay_slider)
+    //{
+        //audioProcessor.delay = delay_slider.getValue();
+    //}
 }

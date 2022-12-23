@@ -13,36 +13,29 @@
 //==============================================================================
 SimpleFirAudioProcessor::SimpleFirAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
-                      #endif
-                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
-                     #endif
-                       )
+    : AudioProcessor(
+          BusesProperties()
+#if !JucePlugin_IsMidiEffect
+#if !JucePlugin_IsSynth
+              .withInput("Input", juce::AudioChannelSet::stereo(), true)
 #endif
-{
-    delay_line = new DelayLine<float>();
-    delay_line->set_delay(1);
-    fir = new Fir<float>(delay_line, 0.0);
-    /**********************************/
-    addParameter(filter_gain = new juce::AudioParameterFloat("filter_gain", // parameterID
-        "Gain", // parameter name
-        min_fir_gain,   // minimum value
-        max_fir_gain,   // maximum value
-        1.0f)); // default value
-    addParameter(filter_delay = new juce::AudioParameterInt("filter_delay", // parameterID
-        "Delay", // parameter name
-        min_delay_in_samples,   // minimum value
-        max_delay_in_samples,   // maximum value
-        min_delay_in_samples)); // default value
+              .withOutput("Output", juce::AudioChannelSet::stereo(), true)
+#endif
+              ),
+      delay_line{std::make_shared<DelayLine<float>>()},
+      fir{std::make_unique<Fir<float>>(delay_line, 0.0)},
+      parameters {
+  *this, nullptr, juce::Identifier("SimpleFirVTS"), {
+    std::make_unique<juce::AudioParameterInt>(
+        "filter_delay", "Delay", min_delay_in_samples, max_delay_in_samples,
+        min_delay_in_samples)
+  }
 }
+#endif
+{ delay_line->set_delay(1); }
 
 SimpleFirAudioProcessor::~SimpleFirAudioProcessor()
 {
-    delete delay_line;
-    delete fir;
     int c = 0;
 }
 
@@ -168,8 +161,12 @@ void SimpleFirAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
+
+    const auto delay_value =
+        parameters.getRawParameterValue("filter_delay")->load();
+
     fir->set_gain(fir_gain); //out of the loop
-    delay_line->set_delay(delay);
+    delay_line->set_delay(delay_value);
 
     /*DBG("fir_gain");
     DBG(fir_gain);
@@ -181,8 +178,6 @@ void SimpleFirAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
     DBG("\n*************\ndelay par");
     DBG(*filter_delay);
     */
-    *filter_gain = fir_gain;
-    *filter_delay = delay;
 
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
@@ -214,16 +209,16 @@ void SimpleFirAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
-    juce::MemoryOutputStream(destData, true).writeFloat(*filter_gain);
-    juce::MemoryOutputStream(destData, true).writeInt(*filter_delay);
+    //juce::MemoryOutputStream(destData, true).writeFloat(*filter_gain);
+    //juce::MemoryOutputStream(destData, true).writeInt(*filter_delay);
 }
 
 void SimpleFirAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
-    *filter_gain = juce::MemoryInputStream(data, static_cast<size_t> (sizeInBytes), false).readFloat();
-    *filter_delay = juce::MemoryInputStream(data, static_cast<size_t> (sizeInBytes), false).readInt();
+    //*filter_gain = juce::MemoryInputStream(data, static_cast<size_t> (sizeInBytes), false).readFloat();
+    //*filter_delay = juce::MemoryInputStream(data, static_cast<size_t> (sizeInBytes), false).readInt();
 }
 
 //==============================================================================
@@ -232,4 +227,3 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new SimpleFirAudioProcessor();
 }
-
